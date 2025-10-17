@@ -1,9 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from mem0 import Memory
-# FIX: 'MemoryConfig' is now imported directly from the root 'mem0' module
-# to resolve the persistent ModuleNotFoundError.
-from mem0 import MemoryConfig 
+from mem0.config import MemConfig 
 import os
 
 # ----------------------------------------------------------------------
@@ -11,7 +9,8 @@ import os
 # ----------------------------------------------------------------------
 
 # 1. Define the custom configuration
-config = MemoryConfig(
+# Change: Renamed class to MemConfig based on documentation
+config = MemConfig(
     # LLM configuration (for fact extraction/reasoning)
     llm={
         "provider": "openai",
@@ -35,6 +34,7 @@ try:
     # 2. Initialize Memory using the custom config
     m = Memory.from_config(config)
 except Exception as e:
+    # This warning helps debug issues with API keys or network connection after import is fixed
     print(f"Warning: Failed to initialize mem0. Ensure MEM0_API_KEY and OPENAI_API_KEY are set. Error: {e}")
     m = None
 
@@ -61,7 +61,10 @@ class AIMessage(BaseModel):
 @app.get("/", summary="Health Check")
 async def root():
     """Simple health check to verify the service is running."""
-    return {"status": "ok", "message": "Mem0 FastAPI service is running."}
+    # Also check if memory is initialized
+    status = "ok" if m is not None else "warning"
+    message = "Mem0 FastAPI service is running." if m is not None else "Mem0 service is running, but Memory initialization failed. Check environment variables."
+    return {"status": status, "message": message}
 
 
 @app.post("/get-context", summary="Retrieve Relevant User Context")
@@ -74,7 +77,6 @@ async def get_memory_context(data: ChatMessage):
         return {"system_prompt": "Error: Memory service not configured."}
     
     # Search for Relevant Memories
-    # Note: top_k argument has been removed to fix TypeError
     relevant_memories = m.search(
         query=data.message,
         user_id=data.user_id
