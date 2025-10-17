@@ -74,10 +74,10 @@ async def get_memory_context(data: ChatMessage):
         return {"system_prompt": "Error: Memory service not configured."}
     
     # Search for Relevant Memories
+    # Note: top_k argument has been removed to fix TypeError
     relevant_memories = m.search(
         query=data.message,
-        user_id=data.user_id,
-        top_k=5  # Adjust as needed
+        user_id=data.user_id
     )
 
     # Format the memories into a concise string for the AI Agent
