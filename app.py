@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from mem0 import Memory
-from mem0.config import MemoryConfig
+# FIX: 'MemoryConfig' is now imported directly from 'mem0' 
+# instead of 'mem0.config' in newer versions.
+from mem0 import MemoryConfig 
 import os
 
 # ----------------------------------------------------------------------
