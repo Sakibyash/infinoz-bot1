@@ -1,19 +1,40 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from mem0 import Memory
+from mem0.config import MemoryConfig
 import os
 
 # ----------------------------------------------------------------------
 # 1. Initialization and Configuration
 # ----------------------------------------------------------------------
-# The 'Memory()' initialization will automatically look for the 
-# MEM0_API_KEY and OPENAI_API_KEY environment variables set in Render.
+
+# 1. Define the custom configuration
+config = MemoryConfig(
+    # LLM configuration (for fact extraction/reasoning)
+    llm={
+        "provider": "openai",
+        "config": {
+            # Change this to 'gpt-4o', 'gpt-3.5-turbo', etc., if desired
+            "model": "gpt-4o-mini", 
+            "temperature": 0.1,
+        }
+    },
+    # Embedder configuration (for vector generation/search)
+    embedder={
+        "provider": "openai",
+        "config": {
+            # Change this to 'text-embedding-3-large' if you need higher accuracy
+            "model": "text-embedding-3-small"
+        }
+    }
+)
+
 try:
-    m = Memory()
+    # 2. Initialize Memory using the custom config
+    m = Memory.from_config(config)
 except Exception as e:
-    # Handle case where MEM0_API_KEY might be missing during testing
-    print(f"Warning: Failed to initialize mem0. Ensure MEM0_API_KEY is set. Error: {e}")
-    m = None # Keep m as None if initialization failed
+    print(f"Warning: Failed to initialize mem0. Ensure MEM0_API_KEY and OPENAI_API_KEY are set. Error: {e}")
+    m = None
 
 app = FastAPI(
     title="Mem0 Memory Handler", 
