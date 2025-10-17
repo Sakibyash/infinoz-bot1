@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from mem0 import Memory
-# FIX: 'MemoryConfig' is now likely found in the 'configs' submodule 
-# to resolve the ImportError from 'mem0' root and ModuleNotFoundError from 'mem0.config'.
-from mem0.configs import MemoryConfig 
+# FIX: 'MemoryConfig' is now imported from the singular 'config' submodule 
+# to resolve the persistent ImportError.
+from mem0.config import MemoryConfig 
 import os
 
 # ----------------------------------------------------------------------
